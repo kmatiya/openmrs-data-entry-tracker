@@ -28,16 +28,23 @@ public class AppointmentReportService {
     @Autowired
     LocationHandler locationHandler;
 
-    public  HashMap<String, List<AppointmentReport>>  getUpperNenoAppointmentReport(String date){
+    public  HashMap<String, List<AppointmentReport>> getAppointmentReport(String date, String username, String password,String serverLocation){
         System.setProperty("jsse.enableSNIExtension", "false");
         // create headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBasicAuth("kmatiya","@1450kondwani");
+        headers.setBasicAuth(username,password);
+        HashMap<Integer, String> getLocations;
 
-        HashMap<Integer, String> getUpperNeno = locationHandler.getUpperNenoLocations();
-
-        //HashMap<Integer, String> getUpperNeno = locationHandler.getLowerNenoLocations();
+        String url = "";
+        if(serverLocation.equals("upper")){
+            getLocations = locationHandler.getUpperNenoLocations();
+            url = "https://neno.pih-emr.org/openmrs/ws/rest/v1/pihmalawi/data-entry?date="+date+"&location=";
+        }
+        else {
+            getLocations = locationHandler.getLowerNenoLocations();
+            url = "http://lisungwi.pih-emr.org:8100/openmrs/ws/rest/v1/pihmalawi/data-entry?date="+date+"&location=";
+        }
 
         // create request
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -45,13 +52,12 @@ public class AppointmentReportService {
         System.out.println("Collecting reports for facility.");
         try
         {
-            for (Integer location:getUpperNeno.keySet()) {
+            for (Integer location:getLocations.keySet()) {
                 // make a request
-                String locationName = getUpperNeno.get(location);
+                String locationName = getLocations.get(location);
                 System.out.println(locationName);
-                String url = "https://neno.pih-emr.org/openmrs/ws/rest/v1/pihmalawi/data-entry?date="+date+"&location="+location;
-          //      String url = "http://lisungwi.pih-emr.org:8100/openmrs/ws/rest/v1/pihmalawi/data-entry?date="+date+"&location="+location;
-                ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, request, String.class);
+                String completeUrl = url+location;
+                ResponseEntity<String> response = new RestTemplate().exchange(completeUrl, HttpMethod.GET, request, String.class);
                 ObjectMapper objectMapper = new ObjectMapper();
                 List<AppointmentReport> appointmentReports = objectMapper.readValue(response.getBody(), new TypeReference<List<AppointmentReport>>(){});
                 dailyAppointments.put(locationName, appointmentReports);
@@ -61,16 +67,26 @@ public class AppointmentReportService {
 
         }catch (HttpClientErrorException ex)
         {
+            System.out.println(ex.getMessage());
             return null;
         }
         catch (ResourceAccessException ex)
         {
+            System.out.println(ex.getMessage());
             return null;
-        } catch (JsonMappingException e) {
+        } catch (JsonMappingException ex) {
+            System.out.println(ex.getMessage());
             return null;
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ex) {
+            System.out.println(ex.getMessage());
             return null;
         }
+        catch (Exception ex)
+        {
+            System.out.println(ex.getMessage());
+            return null;
+        }
+
       //  return null;
     }
 }
