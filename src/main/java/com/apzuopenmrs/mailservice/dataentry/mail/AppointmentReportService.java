@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -25,6 +26,12 @@ import java.util.List;
 @Component
 public class AppointmentReportService {
 
+    @Value("${upper_neno_endpoint}")
+    private String upperNenoEndpoint;
+
+    @Value("${lower_neno_endpoint}")
+    private String lowerNenoEndpoint;
+
     @Autowired
     LocationHandler locationHandler;
 
@@ -39,11 +46,11 @@ public class AppointmentReportService {
         String url = "";
         if(serverLocation.equals("upper")){
             getLocations = locationHandler.getUpperNenoLocations();
-            url = "https://neno.pih-emr.org/openmrs/ws/rest/v1/pihmalawi/data-entry?date="+date+"&location=";
+            url = upperNenoEndpoint+"?date="+date+"&location=";
         }
         else {
             getLocations = locationHandler.getLowerNenoLocations();
-            url = "http://lisungwi.pih-emr.org:8100/openmrs/ws/rest/v1/pihmalawi/data-entry?date="+date+"&location=";
+            url = lowerNenoEndpoint+"?date="+date+"&location=";
         }
 
         // create request
