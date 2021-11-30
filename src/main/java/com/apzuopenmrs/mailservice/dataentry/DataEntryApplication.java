@@ -99,7 +99,7 @@ public class DataEntryApplication {
 			}
 			System.out.println("Preparing to send emails.");
 			String message = app.appointmentEmailGenerator.generateAppointmentEmail(facilityCounts,dataEntryDate);
-			app.emailServiceImpl.sendSimpleMessage(recipients, "Daily Data Entry for "+ app.serverLocation+"Neno"+ dataEntryDate, message, app.senderEmail);
+			app.emailServiceImpl.sendSimpleMessage(recipients, "Daily Data Entry for "+ app.serverLocation+" Neno"+ dataEntryDate, message, app.senderEmail);
 			System.out.println("Appointment email sent");
 		}
 		else{
