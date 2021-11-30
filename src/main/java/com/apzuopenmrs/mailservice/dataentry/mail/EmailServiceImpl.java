@@ -16,14 +16,14 @@ public class EmailServiceImpl {
     private JavaMailSender emailSender;
 
     public void sendSimpleMessage(
-            String to, String subject, String text) throws MessagingException {
+            String[] recipients, String subject, String text, String senderEmail) throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();
 
         message.setSubject(subject);
         MimeMessageHelper helper;
         helper = new MimeMessageHelper(message, true);
-        helper.setFrom("khormatiya@gmail.com");
-        helper.setTo(to);
+        helper.setFrom(senderEmail);
+        helper.setTo(recipients);
         helper.setText(text, true);
         emailSender.send(message);
       /*  SimpleMailMessage message = new SimpleMailMessage();

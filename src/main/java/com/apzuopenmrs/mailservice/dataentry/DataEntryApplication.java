@@ -14,6 +14,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.mail.MessagingException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,15 +63,34 @@ public class DataEntryApplication {
 	private String dateOfEntry;
 
 	@Value("${recipient_email}")
-	private String recipientEmail;
+	private String recipientEmails;
+
+	@Value("${spring.mail.username}")
+	private String senderEmail;
+
+	@Value("${spring.mail.password}")
+	private String senderPassword;
+
+	@Value("${use_configured_date_of_entry}")
+	private boolean autoConfiguredDateOfEntry;
+
 
 	public static void main(String[] args) throws MessagingException {
 		ApplicationContext context  = SpringApplication.run(DataEntryApplication.class, args);
 		DataEntryApplication app = context.getBean(DataEntryApplication.class);
-		String dataEntryDate = app.dateOfEntry;
+		String dataEntryDate = "";
+
+		if(app.autoConfiguredDateOfEntry) {
+			dataEntryDate = app.dateOfEntry;
+		}
+		else{
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			dataEntryDate=LocalDate.now().format(formatter);
+		}
 		HashMap<String, List<AppointmentReport>> dailyAppointments = app.appointmentReportService.getAppointmentReport(dataEntryDate, app.username, app.password, app.serverLocation);
 		if(dailyAppointments != null){
 			System.out.println("Reports collected");
+			String[] recipients = app.recipientEmails.split(",");
 			List<FacilityCount> facilityCounts = new ArrayList<>();
 			System.out.println("Aggregating reports.");
 			for (String location : dailyAppointments.keySet()) {
@@ -78,7 +99,7 @@ public class DataEntryApplication {
 			}
 			System.out.println("Preparing to send emails.");
 			String message = app.appointmentEmailGenerator.generateAppointmentEmail(facilityCounts,dataEntryDate);
-			app.emailServiceImpl.sendSimpleMessage(app.recipientEmail, "Daily Data Entry for "+ app.serverLocation+"Neno"+ dataEntryDate, message);
+			app.emailServiceImpl.sendSimpleMessage(recipients, "Daily Data Entry for "+ app.serverLocation+"Neno"+ dataEntryDate, message, app.senderEmail);
 			System.out.println("Appointment email sent");
 		}
 		else{
