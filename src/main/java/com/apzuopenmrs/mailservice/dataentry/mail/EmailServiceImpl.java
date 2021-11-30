@@ -17,6 +17,7 @@ public class EmailServiceImpl {
 
     public void sendSimpleMessage(
             String[] recipients, String subject, String text, String senderEmail) throws MessagingException {
+
         MimeMessage message = emailSender.createMimeMessage();
 
         message.setSubject(subject);

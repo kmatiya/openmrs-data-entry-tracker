@@ -74,7 +74,6 @@ public class DataEntryApplication {
 	@Value("${use_configured_date_of_entry}")
 	private boolean autoConfiguredDateOfEntry;
 
-
 	public static void main(String[] args) throws MessagingException {
 		ApplicationContext context  = SpringApplication.run(DataEntryApplication.class, args);
 		DataEntryApplication app = context.getBean(DataEntryApplication.class);
