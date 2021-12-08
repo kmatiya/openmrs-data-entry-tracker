@@ -65,6 +65,9 @@ public class DataEntryApplication {
 	@Value("${recipient_email}")
 	private String recipientEmails;
 
+	@Value("${cc_emails}")
+	private String copyEmails;
+
 	@Value("${spring.mail.username}")
 	private String senderEmail;
 
@@ -90,6 +93,7 @@ public class DataEntryApplication {
 		if(dailyAppointments != null){
 			System.out.println("Reports collected");
 			String[] recipients = app.recipientEmails.split(",");
+			String[] copyRecipients = app.copyEmails.split(",");
 			List<FacilityCount> facilityCounts = new ArrayList<>();
 			System.out.println("Aggregating reports.");
 			for (String location : dailyAppointments.keySet()) {
@@ -98,11 +102,13 @@ public class DataEntryApplication {
 			}
 			System.out.println("Preparing to send emails.");
 			String message = app.appointmentEmailGenerator.generateAppointmentEmail(facilityCounts,dataEntryDate);
-			app.emailServiceImpl.sendSimpleMessage(recipients, "Daily Data Entry for "+ app.serverLocation+" Neno"+ dataEntryDate, message, app.senderEmail);
+			app.emailServiceImpl.sendSimpleMessage(recipients,copyRecipients, "Daily Data Entry for "+ app.serverLocation+" Neno"+ dataEntryDate, message, app.senderEmail);
 			System.out.println("Appointment email sent");
+			System.exit(0);
 		}
 		else{
 			System.out.println("Appointment not generated");
+			System.exit(0);
 		}
 	}
 }

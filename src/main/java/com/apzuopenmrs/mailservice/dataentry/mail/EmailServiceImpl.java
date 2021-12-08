@@ -16,7 +16,7 @@ public class EmailServiceImpl {
     private JavaMailSender emailSender;
 
     public void sendSimpleMessage(
-            String[] recipients, String subject, String text, String senderEmail) throws MessagingException {
+            String[] recipients,String[] copyRecipients, String subject, String text, String senderEmail) throws MessagingException {
 
         MimeMessage message = emailSender.createMimeMessage();
 
@@ -25,6 +25,9 @@ public class EmailServiceImpl {
         helper = new MimeMessageHelper(message, true);
         helper.setFrom(senderEmail);
         helper.setTo(recipients);
+        for (String recipient:copyRecipients) {
+            helper.addCc(recipient);
+        }
         helper.setText(text, true);
         emailSender.send(message);
       /*  SimpleMailMessage message = new SimpleMailMessage();
